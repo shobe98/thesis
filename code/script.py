@@ -27,8 +27,8 @@ filtered = filtered[filtered.chr == 1]
 # first 20 genes in order of standard deviation of 5'utr length of mTIFs
 interesting = filtered.sort_values(by=["sd5"])[:20]
 
-interesting_genes = filter(
-    lambda gene: gene.name in list(interesting.gene), genes)
+interesting_genes = filter(lambda gene: gene.name in list(interesting.gene),
+                           genes)
 print(list(interesting_genes))
 
 i = 0
