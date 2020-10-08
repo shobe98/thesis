@@ -65,37 +65,11 @@ def generate_read_density(start, end, allreads):
     reads = grab_reads("chrI", allreads, positive_strand_only=True)
     for read in reads:
         # this condition checks whether a read overlaps at all with the interesting region [start, end]
-        if a.reference_start <= end and a.reference_end >= start:
+        if read.reference_start <= end and read.reference_end >= start:
             read_adjusted_start = max(read.reference_start, start) - start
             read_adjusted_end = min(read.reference_end, end) - start
             density[read_adjusted_start] = density[read_adjusted_start] + 1
             density[read_adjusted_end + 1] = density[read_adjusted_end + 1] - 1
     for i in range(1, len(density)):
         density[i] = density[i] + density[i - 1]
-
-
-#somelist = [0] * (2 * chr1_approx_size)
-
-#print(max(somelist))
-#stmtz = pd.read_csv("./SteinmetzGilbert/stmtz_n_mtifs.txt", sep='\t')
-#filtered = stmtz[stmtz.strand == "+"]
-#filtered = filtered[filtered.chr == 1]
-#
-## first 20 genes in order of standard deviation of 5'utr length of mTIFs
-#interesting = filtered.sort_values(by=["sd5"])[:20]
-#
-#interesting_genes = filter(lambda gene: gene.name in list(interesting.gene),
-#                           genes)
-#print(list(interesting_genes))
-#
-#i = 0
-#for gene in interesting_genes:
-#    if gene.strand == "+":
-#        plt.plot(range(1, gene.end - gene.start + 1),
-#                 somelist[gene.start:gene.end])
-#        plt.savefig("gene_" + gene.name + ".png")
-#        plt.close()
-#
-#        i = i + 1
-#        if i == 20:
-#            break
+    return density
