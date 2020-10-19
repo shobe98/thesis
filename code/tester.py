@@ -1,37 +1,29 @@
 import helper
 from matplotlib import interactive
 import matplotlib.pyplot as plt
+import numpy as np
 
 interactive(True)
 
-bamfile, bedfile, steinmetz = helper.read_files()
-#a = helper.grab_reads("chrI", x, positive_strand_only=True)
+_kDefaultChrom1Size = 229424
 
-#somelist = helper.generate_read_density(0, helper._kDefaultChrom1Size, bamfile)
-#
-#filtered = steinmetz[steinmetz.strand == "+"]
-#filtered = filtered[filtered.chr == 1]
-#
-## first 20 genes in order of standard deviation of 5'utr length of mTIFs
-#interesting = filtered.sort_values(by=["sd5"])[:20]
-#
-#interesting_genes = filter(lambda gene: gene.name in list(interesting.gene),
-#                           bedfile)
-#interesting_genes = list(interesting_genes)
+# Test for read_files (no assertions; if it works, it works :)) )
+bamfile, genes_dict, steinmetz = helper.read_files()
 
-#i = 0
-#for gene in interesting_genes:
-#    if gene.strand == "+":
-#        print("Plotting gene " + gene.name)
-#        plt.plot(range(1, gene.end - gene.start + 1),
-#                 somelist[gene.start:gene.end])
-#        plt.savefig("tester_output/gene_" + gene.name + ".png")
-#        plt.close()
-#
-#        i = i + 1
-#        if i == 20:
-#            break
+# Test for grab_reads
+chr1_reads = helper.grab_reads("chrI", bamfile, positive_strand_only=True)
 
+# Test for generate_read_density
+density = helper.generate_read_density_interval(0, _kDefaultChrom1Size,
+                                                bamfile)
+density2 = helper.generate_read_density_chrom("chrI", bamfile)
+assert np.equal(density, density2).all()
+
+# Test for read all tifs
 tifs = helper.read_all_tifs(positive_strand_only=True)
-helper.generate_metagene(bamfile, bedfile, tifs, "chrI")
-helper.generate_random_metagene(bamfile, bedfile, "chrI", 1231)
+
+# Test for generate metagene:
+# Overlaps all junctions found in the tif file and creates a metagene plot for -200 +200 nt of each junction
+# tests generate_5utr_isoform_starts and make_metagene_plot
+helper.generate_metagene(bamfile, tifs, "chrI")
+helper.generate_random_metagene(bamfile, "chrI", 1231)

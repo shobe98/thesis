@@ -6,13 +6,14 @@ import sys
 from numpy import unique
 import numpy as np
 
+# 213 Days til graduation
+np.random.seed(213)
+
 # This script is in ../code. Change these paths if needed
 _kDefaultBamFile = "../AitkenLab/rnaseq_all.bam"
 _kDefaultBedFile = "../indexes/yeast-all.bed"
 _kDefaultMTIFFile = "../SteinmetzGilbert/stmtz_n_mtifs.txt"
 _kDefaultTIFsFile = "../parsed_steinmetz_s1_tifs.txt"
-_kDefaultChrom1Size = 230220
-_kMaxReadLength = 100  # jic, but for chrI max read length is 44.
 
 kYeastChroms = [
     "chrI", "chrII", "chrIII", "chrIV", "chrV", "chrVI", "chrVII", "chrVIII",
@@ -115,9 +116,9 @@ def save_density_plot(density, ox, filename):
     plt.close()
 
 
-def generate_metagene(reads, genes, tifs, chrom):
-    chrom_tifs = read_tifs_chrom(tifs, "chrI", positive_strand_only=True)
-    density = generate_read_density(0, _kDefaultChrom1Size, reads, genes)
+def generate_metagene(reads, tifs, chrom):
+    chrom_tifs = read_tifs_chrom(tifs, chrom, positive_strand_only=True)
+    density = generate_read_density_chrom(chrom, reads)
     #TODO(astanciu): implement a funciton that generates the density of reads for a whole chromosome (no star/end params)
 
     splits = []
@@ -126,16 +127,16 @@ def generate_metagene(reads, genes, tifs, chrom):
         split_positions = generate_5utr_isoform_starts(tifs)
         splits = splits + split_positions
         #list(np.random.choice(split_positions, 1, replace=False))
-    make_metagene_plot(density, splits, "meta_chr1.png", 200, 200)
-
-
-def generate_random_metagene(reads, genes, chrom, sample_size):
-    density = generate_read_density(0, _kDefaultChrom1Size, reads, genes)
-    splits = np.random.randint(201,
-                               _kDefaultChrom1Size - 201,
-                               size=sample_size)
-    make_metagene_plot(density, splits, "meta_chr1_random_sample.png", 200,
+    make_metagene_plot(density, splits, "tester_output/meta_chr1.png", 200,
                        200)
+
+
+def generate_random_metagene(reads, chrom, sample_size):
+    density = generate_read_density_chrom(chrom, reads)
+    splits = np.random.randint(201, len(density) - 201, size=sample_size)
+    # TODO(astanciu): check for duplicates
+    make_metagene_plot(density, splits,
+                       "tester_output/meta_chr1_random_sample.png", 200, 200)
 
 
 def make_metagene_plot(density, splits, plotname, upstream, downstream):
@@ -152,6 +153,7 @@ def read_files(bedfile=_kDefaultBedFile,
                bamfile=_kDefaultBamFile,
                mtiffile=_kDefaultMTIFFile,
                positive_strand_only=False):
+
     bam = pysam.AlignmentFile(bamfile)
     # This is just an iterator in the file
     genes = BedTool(bedfile)  # Full genome loaded in memory
@@ -167,7 +169,21 @@ def read_files(bedfile=_kDefaultBedFile,
     return bam, genes_dict, mtifs
 
 
-def generate_read_density(start, end, allreads, genome):
+def generate_read_density_chrom(chrom, allreads):
+    end = 0
+    reads = grab_reads(chrom, allreads, positive_strand_only=True)
+    for read in reads:
+        end = max(end, read.reference_end)
+    density = [0] * (end + 2)
+    for read in reads:
+        density[read.reference_start] = density[read.reference_start] + 1
+        density[read.reference_end + 1] = density[read.reference_end + 1] - 1
+    for i in range(1, len(density)):
+        density[i] = density[i] + density[i - 1]
+    return density
+
+
+def generate_read_density_interval(start, end, allreads):
     density = [0] * (end - start + 2)
     reads = grab_reads("chrI", allreads, positive_strand_only=True)
     for read in reads:
