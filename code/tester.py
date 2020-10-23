@@ -8,7 +8,7 @@ interactive(True)
 _kDefaultChrom1Size = 229424
 
 # Test for read_files (no assertions; if it works, it works :)) )
-bamfile, genes_dict, steinmetz = helper.read_files()
+bamfile, genes_dict, steinmetz = helper.read_files(positive_strand_only=True)
 
 # Test for grab_reads
 chr1_reads = helper.grab_reads("chrI", bamfile, positive_strand_only=True)
@@ -25,5 +25,12 @@ tifs = helper.read_all_tifs(positive_strand_only=True)
 # Test for generate metagene:
 # Overlaps all junctions found in the tif file and creates a metagene plot for -200 +200 nt of each junction
 # tests generate_5utr_isoform_starts and make_metagene_plot
-helper.generate_metagene(bamfile, tifs, "chrI")
-helper.generate_random_metagene(bamfile, "chrI", 1231)
+
+chr1_genes = [gene for gene in genes_dict.values() if gene.chrom == "chrI"]
+
+print("We have " + str(len(chr1_genes)) + " on + strand in chrI")
+
+# TODO(astanciu): have the code produce logs of steps and parameters
+for chrom in helper.kYeastChroms:
+    helper.generate_metagene(bamfile, tifs, chrom)
+    helper.generate_random_metagene(bamfile, chrom, 1231)
