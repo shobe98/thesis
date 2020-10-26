@@ -28,9 +28,18 @@ tifs = helper.read_all_tifs(positive_strand_only=True)
 
 chr1_genes = [gene for gene in genes_dict.values() if gene.chrom == "chrI"]
 
-print("We have " + str(len(chr1_genes)) + " on + strand in chrI")
+print("We have " + str(len(chr1_genes)) + " genes on + strand in chrI")
 
-# TODO(astanciu): have the code produce logs of steps and parameters
+
+def make_metagenes_for_chrom(chrom):
+    chr_density = helper.generate_read_density_chrom(chrom, bamfile)
+    helper.generate_metagene(bamfile, tifs, chrom, density=chr_density)
+    helper.generate_random_metagene(bamfile, chrom, 1231, density=chr_density)
+
+
 for chrom in helper.kYeastChroms:
-    helper.generate_metagene(bamfile, tifs, chrom)
-    helper.generate_random_metagene(bamfile, chrom, 1231)
+    make_metagenes_for_chrom(chrom)
+
+#pool = multiprocessing.Pool(multiprocessing.cpu_count())
+#pool.map(make_metagenes_for_chrom, helper.kYeastChroms):
+#pool.close()
