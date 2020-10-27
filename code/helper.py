@@ -16,6 +16,8 @@ _kDefaultMTIFFile = "../SteinmetzGilbert/stmtz_n_mtifs.txt"
 _kDefaultTIFsFile = "../parsed_steinmetz_s1_tifs.txt"
 _kMetageneRangeNt = 50
 
+DEBUG_MODE = True
+
 kYeastChroms = [
     "chrI", "chrII", "chrIII", "chrIV", "chrV", "chrVI", "chrVII", "chrVIII",
     "chrIX", "chrX", "chrXI", "chrXII", "chrXIII", "chrXIV"
@@ -128,9 +130,10 @@ def grab_reads(chrom, reads, positive_strand_only=False):
     if positive_strand_only:
         return [x for x in filtered if not x.is_reverse]
     chr_reads = list(reads.fetch(chrom))
-    print("Processed mRNAs from chromosome " + chrom +
-          ". Total reads in chromosome: " + len(chr_reads) +
-          ". positive_strand_only=" + str(positive_strand_only))
+    if DEBUG_MODE:
+        print("Processed mRNAs from chromosome " + chrom +
+              ". Total reads in chromosome: " + len(chr_reads) +
+              ". positive_strand_only=" + str(positive_strand_only))
 
 
 def generate_5utr_isoform_starts(tifs):
@@ -318,10 +321,12 @@ def generate_read_density_chrom(chrom, allreads):
     print("generate_read_density_chrom chrom=" + chrom)
     end = 0
     reads = grab_reads(chrom, allreads, positive_strand_only=True)
-    print("len(reads)=" + str(len(reads)))
+    if DEBUG_MODE:
+        print("len(reads)=" + str(len(reads)))
     for read in reads:
         end = max(end, read.reference_end)
-    print("chrom_size=" + str(max))
+    if DEBUG_MODE:
+        print("chrom_size=" + str(end))
     # To compute the density first compute the delta in read density at each position in the genome
     density = [0] * (end + 2)
     for read in reads:
