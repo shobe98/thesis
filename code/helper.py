@@ -1,16 +1,19 @@
 import pysam
 import matplotlib.pyplot as plt
+import matplotlib
 from pybedtools import BedTool
 import pandas as pd
 import sys
 from numpy import unique
 import numpy as np
 
+matplotlib.use('Agg')
+
 # 213 Days til graduation
 np.random.seed(213)
 
 # This script is in ../code. Change these paths if needed
-_kDefaultBamFile = "../AitkenLab/rnaseq_all.bam"
+_kDefaultBamFile = "../AitkenLab/CA1_3.bam"
 _kDefaultBedFile = "../indexes/yeast-all.bed"
 _kDefaultMTIFFile = "../SteinmetzGilbert/stmtz_n_mtifs.txt"
 _kDefaultTIFsFile = "../parsed_steinmetz_s1_tifs.txt"
@@ -164,8 +167,6 @@ def generate_5utr_isoform_starts(tifs):
     ret = [(x, "+") for x in sorted(list(unique(ret_p)))
            ] + [(x, "-") for x in sorted(list(unique(ret_n)))]
     # This is a naive version for now
-    print("type of ret[0] is " + str(type(ret[0])))
-    print(ret[0])
     return ret
     #if len(ret) <= 2:
     #    return []  # never return the first junction site
@@ -216,24 +217,20 @@ def generate_metagene(reads, tifs, chrom, density=None):
     if not density:
         density = generate_read_density_chrom(chrom, reads)
     print("Done generating density for metagene plot for chromosome " + chrom)
-    print(type(density))
     splits = []
 
     for gene, tifs in chrom_tifs.items():
         split_positions = generate_5utr_isoform_starts(tifs)
         splits = splits + split_positions
-        if not split_positions:
-            print("WTFFF...")
-            print(gene)
-            print(tifs)
-        #list(np.random.choice(split_positions, 1, replace=False))
-    print("type of splits[0] in make_metagene " + str(type(splits[0])))
-    print(splits[0])
+        #if not split_positions:
+        #    print("WTFFF...")
+        #    print(gene)
+        #    print(tifs)
     print("Making the metagene plot...")
     return make_metagene_plot(
         density,
         splits,
-        "tester_output_experiments/meta_both_" + chrom + ".png",
+        "jr_ca1_3/meta_both_" + chrom + ".png",
         _kMetageneRangeNt,
         _kMetageneRangeNt,
         plottitle="Metagene " + chrom + " steinmetz 5'UTR junction")
@@ -288,9 +285,7 @@ def generate_random_metagene(reads,
     else:
         splits_p = list(
             np.random.randint(201, chrom_size - 201, size=sample_size))
-        print(splits_p)
         splits_p = [(x, "+") for x in splits_p]
-        print(splits_p)
         splits_n = list(
             np.random.randint(201, chrom_size - 201, size=sample_size))
         splits_n = [(x, "-") for x in splits_n]
@@ -305,7 +300,7 @@ def generate_random_metagene(reads,
     print("Generating random sample metagene...")
     return make_metagene_plot(density,
                               splits,
-                              "tester_output_experiments/meta_both_" + chrom +
+                              "jr_ca1_3/meta_both_" + chrom +
                               "_random_sample.png",
                               _kMetageneRangeNt,
                               _kMetageneRangeNt,
@@ -344,8 +339,6 @@ def make_metagene_plot(density,
     print(type(density))
     density_p, density_n = density
 
-    print("type of splits[0] is " + str(type(splits[0])))
-    print(splits[0])
     for splitidx, strand in splits:
         if strand == "+":
             meta = np.add(

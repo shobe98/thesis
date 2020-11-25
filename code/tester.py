@@ -1,3 +1,7 @@
+from os import sys
+import os
+sys.path.append(os.getcwd()) 
+
 import helper
 from matplotlib import interactive
 import matplotlib.pyplot as plt
