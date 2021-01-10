@@ -161,11 +161,10 @@ def generate_5utr_isoform_starts(tifs):
         else:
             ret_n.append(x['t3'])
 
+    # TODO positive_strand_only
     ret = [(x, "+") for x in sorted(list(unique(ret_p)))
-           ] + [(x, "-") for x in sorted(list(unique(ret_n)))]
+           ]  #+ [(x, "-") for x in sorted(list(unique(ret_n)))]
     # This is a naive version for now
-    print("type of ret[0] is " + str(type(ret[0])))
-    print(ret[0])
     return ret
     #if len(ret) <= 2:
     #    return []  # never return the first junction site
@@ -233,7 +232,7 @@ def generate_metagene(reads, tifs, chrom, density=None):
     return make_metagene_plot(
         density,
         splits,
-        "tester_output_experiments/meta_both_" + chrom + ".png",
+        "tester_output_w_junctions/meta_pos_" + chrom + ".png",
         _kMetageneRangeNt,
         _kMetageneRangeNt,
         plottitle="Metagene " + chrom + " steinmetz 5'UTR junction")
@@ -243,10 +242,10 @@ def inside_annotated_regions(x, strand, genome_chrom):
     return x > 200
 
 
-def generate_random_split_junctions(size, chrom_size, genome_chrom):
+def generate_random_split_junctions(size, candidates, chrom_size,
+                                    genome_chrom):
     print("generating random junctions...")
-    splits_p = []
-    splits_p = list(unique(np.random.randint(1, chrom_size - 201, size)))
+    splits_p = np.random.choice(candidates, size, replace=False)
     splits_p = [(x, "+") for x in splits_p
                 if inside_annotated_regions(x, "+", genome_chrom)]
     splits_n = []
@@ -254,12 +253,15 @@ def generate_random_split_junctions(size, chrom_size, genome_chrom):
     splits_n = [(x, "-") for x in splits_n
                 if inside_annotated_regions(x, "+", genome_chrom)]
 
+    # TODO positive_strand_only
+    return splits_p
     return splits_n + splits_p
 
 
 def generate_random_metagene(reads,
                              chrom,
                              sample_size,
+                             candidates,
                              density=None,
                              genome=None):
     """
@@ -283,6 +285,7 @@ def generate_random_metagene(reads,
         density = generate_read_density_chrom(chrom, reads)
     if genome:
         splits = generate_random_split_junctions(size=sample_size,
+                                                 candidates=candidates,
                                                  chrom_size=len(density[0]),
                                                  genome_chrom=genome[chrom])
     else:
@@ -305,7 +308,7 @@ def generate_random_metagene(reads,
     print("Generating random sample metagene...")
     return make_metagene_plot(density,
                               splits,
-                              "tester_output_experiments/meta_both_" + chrom +
+                              "tester_output_w_junctions/meta_pos_" + chrom +
                               "_random_sample.png",
                               _kMetageneRangeNt,
                               _kMetageneRangeNt,
@@ -362,20 +365,29 @@ def make_metagene_plot(density,
     return meta
 
 
-def read_files(bedfile=_kDefaultBedFile, bamfile=_kDefaultBamFile):
-    """
-    Reads in a bedfile, a genome (bed) and steinmetz mTIF data.
-    """
-    print("Reading files...")
-    bam = pysam.AlignmentFile(bamfile)
+def read_bamfile(bamfile=_kDefaultBamFile):
+    print("Reading bamfile...")
     # This is just an iterator in the file
+    bam = pysam.AlignmentFile(bamfile)
+    print("Done reading bamfile " + bamfile)
+    return bam
+
+
+def read_bedfile(bedfile=_kDefaultBedFile):
+    print("Reading bedfile...")
     genes = BedTool(bedfile)  # Full genome loaded in memory
     genes_dict = {}
     for g in genes:
         genes_dict[g.name] = g
+    print("Done reading bedfile " + bedfile)
+    return genes_dict
 
-    print("Done reading files...")
-    return bam, genes_dict
+
+def read_files(bedfile=_kDefaultBedFile, bamfile=_kDefaultBamFile):
+    """
+    Reads in a bedfile, a genome (bed) and steinmetz mTIF data.
+    """
+    return read_bamfile(bamfile), read_bedfile(bedfile)
 
 
 def read_mtifs(mtiffile=_kDefaultMTIFFile, positive_strand_only=False):
