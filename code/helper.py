@@ -411,8 +411,12 @@ def generate_read_density_chrom(chrom, allreads):
     (doesn't depend on read length)
     """
     print("generate_read_density_chrom chrom=" + chrom)
-    end = 0
     reads = grab_reads(chrom, allreads)
+    return __generate_read_density(reads)
+
+
+def __generate_read_density(reads):
+    end = 0
     for read in reads:
         end = max(end, read.reference_end)
     if DEBUG_MODE:
