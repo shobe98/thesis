@@ -3,6 +3,7 @@ import os
 sys.path.append(os.getcwd()) 
 
 import helper
+import random_junctions
 from matplotlib import interactive
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,15 +38,20 @@ tifs = helper.read_all_tifs()
 #
 #print("We have " + str(len(chr1_genes)) + " genes on + strand in chrI")
 
+rand_junctions_candidates_by_chrom = random_junctions.generate_candidates_for_junctions(
+    genome=grouped_genes)
+
 
 def make_metagenes_for_chrom(chrom):
     chr_density = helper.generate_read_density_chrom(chrom, bamfile)
     helper.generate_metagene(bamfile, tifs, chrom, density=chr_density)
-    helper.generate_random_metagene(bamfile,
-                                    chrom,
-                                    1231,
-                                    density=chr_density,
-                                    genome=grouped_genes)
+    helper.generate_random_metagene(
+        bamfile,
+        chrom,
+        1231,
+        density=chr_density,
+        genome=grouped_genes,
+        candidates=rand_junctions_candidates_by_chrom[chrom])
 
 
 #make_metagenes_for_chrom("chrI")
