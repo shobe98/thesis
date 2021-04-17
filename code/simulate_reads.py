@@ -15,14 +15,78 @@ class FakeRead:
         self.is_reverse = (strand == "-")
 
 
+class Isoform:
+    # probably more data
+    def __init__(self, start, end, strand="+"):
+        self.start = start
+        self.end = end
+        self.strand = strand
+
+
+# JUST PROTOTYPES
+def generate_isoform_aware_density(isoforms,
+                                   distribution,
+                                   total_reads,
+                                   read_length=44):
+    if len(isoforms) != len(distribution):
+        print("Error distribution and isoforms should have the same size")
+        return
+    isoform_reads = np.multiply(distribution, total_reads)
+    isoform_reads = [int(x) for x in isoform_reads]
+    min_p = min([iso.start for iso in isoforms])
+    max_p = max([iso.end for iso in isoforms])
+    density = [0] * (max_p - min_p + 1)
+    for i in range(0, len(isoforms)):
+        reads = random_reads_in_interval(isoforms[i].start, isoforms[i].end,
+                                         isoform_reads[i], read_length)
+        dens, _ = helper.__generate_read_density(reads)
+        print(len(dens))
+        d_start = isoforms[i].start - min_p
+        d_end = isoforms[i].end - min_p + 1
+        print(d_start)
+        print(d_end)
+        print(isoforms[i].start)
+        print(len(dens[isoforms[i].start:-1]))
+        density[d_start:d_end] = list(
+            np.add(density[d_start:d_end], dens[isoforms[i].start:-1]))
+
+    plt.plot(range(min_p, max_p + 1), density)
+    plt.title("Isoform distribution\n{}".format(str(distribution)))
+    plt.savefig("tinkering/isoforms/{}_{}.png".format(len(isoforms),
+                                                      total_reads))
+    plt.close()
+
+
+def random_reads_by_fragmentation(lo, hi, sample_size, read_length):
+    gene = list(range(lo, hi))
+    total = []
+    for i in range(0, sample_size):
+        fragments = np.random.choice(gene, int(len(gene) / read_length))
+        fragments = [0] + sorted(fragments) + [len(gene)]
+        lengths = [
+            fragments[j] - fragments[j - 1] for j in range(1, len(fragments))
+        ]
+
+        total = total + lengths
+
+        plt.hist(total, bins=200)
+        plt.savefig("tinkering/fragments_2000/" + str(i) + ".png")
+        plt.close()
+
+
+# ACTUAL CODE
 def random_reads_in_interval(lo, hi, sample_size, read_length, weights=None):
     if weights is None:
         # TODO change this to choice
-        reads = np.random.randint(lo, hi - read_length, sample_size)
+        reads = np.random.randint(lo + read_length, hi, sample_size)
     else:
-        p = np.divide(weights[lo:hi], sum(weights[lo:hi]))
-        reads = np.random.choice(range(lo, hi), size=sample_size, p=p)
-    reads = [FakeRead(x, x + read_length) for x in reads]
+        p = np.divide(weights[(lo + read_length):hi],
+                      sum(weights[(lo + read_length):hi]))
+        reads = np.random.choice(range(lo + read_length, hi),
+                                 size=sample_size,
+                                 p=p)
+    reads = [FakeRead(x - read_length, x) for x in reads]
+    reads.append(FakeRead(lo, lo))
     reads.append(FakeRead(
         hi, hi))  # quick hack so the read densities have the same size
     # FIXME
@@ -214,6 +278,25 @@ def generate_weights_smart(density,
     return None
 
 
-#generate_random_reads()
-generate_uniform_reads_for_chrom()
-#generate_weighted_reads()
+if __name__ == "__main__":
+    #generate_random_reads()
+    #generate_uniform_reads_for_chrom()
+    #generate_weighted_reads()
+    #random_reads_by_fragmentation(0, 2000, 200, 44)
+
+    isoforms2 = [Isoform(1000, 2000), Isoform(1200, 2000)]
+    prob2 = [0.4, 0.6]
+    isoforms3 = [Isoform(1000, 2000), Isoform(1200, 2000), Isoform(1250, 2000)]
+    prob3 = [0.3, 0.3, 0.4]
+    isoforms4 = [
+        Isoform(1000, 2000),
+        Isoform(1200, 2000),
+        Isoform(1250, 2000),
+        Isoform(1400, 2000)
+    ]
+    prob4 = [0.1, 0.1, 0.4, 0.4]
+
+    for total_reads in range(100, 10000, 100):
+        generate_isoform_aware_density(isoforms2, prob2, total_reads)
+        generate_isoform_aware_density(isoforms3, prob3, total_reads)
+        generate_isoform_aware_density(isoforms4, prob4, total_reads)
