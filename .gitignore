@@ -2,4 +2,11 @@ SteinmetzGilbert
 AitkenLab
 fastqc_output
 jr_steinmetz_data
-
+code/__pycache__
+pickles
+pickles.zip
+.ipynb_checkpoints
+accepted_*
+accepted_hits.bam
+align_summary.txt
+toy.pickle
