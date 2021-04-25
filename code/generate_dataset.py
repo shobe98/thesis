@@ -1,4 +1,10 @@
 import helper
+import logging
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+else:
+    logging.basicConfig(level=logging.WARN)
 
 _, genome = helper.read_files()
 genome = helper.organize_genome_by_chrom(genome)
@@ -18,14 +24,14 @@ def generate_read_density_chrom(chrom, allreads):
     This function is linear in number of reads and length of chromosome.
     (doesn't depend on read length)
     """
-    print("generate_read_density_chrom chrom=" + chrom)
+    logging.info("generate_read_density_chrom chrom=" + chrom)
     end = 0
     reads = grab_reads(chrom, allreads)
     for read in reads:
         end = max(end, read.reference_end)
     if DEBUG_MODE:
-        print("len(reads)=" + str(len(reads)))
-        print("chrom_size=" + str(end))
+        logging.info("len(reads)=" + str(len(reads)))
+        logging.info("chrom_size=" + str(end))
 
     # To compute the density first compute the delta in read density at each position in the genome
     density_p = [0] * (end + 2)
@@ -50,7 +56,7 @@ def generate_read_density_chrom(chrom, allreads):
     for i in range(1, len(density_p)):
         density_p[i] = density_p[i] + density_p[i - 1]
         density_n[i] = density_n[i] + density_n[i - 1]
-    print("Done generating read density...")
-    print("Sum of density_n: " + str(sum(density_n)))
-    print("Sum of density_p: " + str(sum(density_p)))
+    logging.info("Done generating read density...")
+    logging.info("Sum of density_n: " + str(sum(density_n)))
+    logging.info("Sum of density_p: " + str(sum(density_p)))
     return (density_p, density_n)

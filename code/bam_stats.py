@@ -1,6 +1,12 @@
 import helper
 import random_junctions
 from pandas import Series
+import logging
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+else:
+    logging.basicConfig(level=logging.WARN)
 
 genome = helper.read_bedfile()
 genome = helper.organize_genome_by_chrom(genome)
@@ -23,16 +29,16 @@ def analyze_chromosome(chrom, density_p, annotated_regions, window_size=100):
     rolling_avg_reads = Series(density_p).rolling(window_size).mean().tolist()
     for gn, st in start[chrom].items():
         en = end[chrom][gn]
-        print(gn)
-        print(rolling_avg_reads[(st - 400):(st - 200)])
-        print(rolling_avg_reads[st:(st + 200)])
+        logging.info(gn)
+        logging.info(rolling_avg_reads[(st - 400):(st - 200)])
+        logging.info(rolling_avg_reads[st:(st + 200)])
 
-        print(sum(density_p[st:en]))
-        print("\n")
+        logging.info(sum(density_p[st:en]))
+        logging.info("\n")
 
 
 def bam_stats(allreads, genome, tifs):
-    print("computing genomic boundaries")
+    logging.info("computing genomic boundaries")
     min_5utr_start, aug_pos = random_junctions.get_5utr_boundaries(
         genome, tifs)
     annotated_regions = random_junctions.get_max_possible_genomic_regions(
@@ -40,14 +46,14 @@ def bam_stats(allreads, genome, tifs):
 
     result = {}
     for chrom in helper.kYeastChroms:
-        print("processing chrom " + chrom)
+        logging.info("processing chrom " + chrom)
         result[chrom] = {}
         end = 0
 
         reads = helper.grab_reads(chrom, allreads, positive_strand_only=True)
         total_size = 0.0
 
-        print("computing avg read size")
+        logging.info("computing avg read size")
         for read in reads:
             end = max(end, read.reference_end)
             total_size = total_size + read.reference_length
@@ -58,7 +64,7 @@ def bam_stats(allreads, genome, tifs):
         result[chrom]["total_size"] = total_size
         result[chrom]["read_count"] = len(reads)
 
-        print("computing density of reads")
+        logging.info("computing density of reads")
         # To compute the density first compute the delta in read density at each position in the genome
         density_p = [0] * (end + 2)
         density_n = [0] * (end + 2)
@@ -73,7 +79,7 @@ def bam_stats(allreads, genome, tifs):
                 density_p[
                     read.reference_start] = density_p[read.reference_start] + 1
 
-        print("analyze_chromosome")
+        logging.info("analyze_chromosome")
         # need a "density" array just marks with 1 the beginning of any read.
         analyze_chromosome(chrom, density_p, annotated_regions)
         #this is necessary to answer queries of the form "how many reads start in given interval"
@@ -81,7 +87,7 @@ def bam_stats(allreads, genome, tifs):
             density_p[i] = density_p[i - 1] + density_p[i]
             density_n[i] = density_n[i - 1] + density_n[i]
 
-        print("computing metrics")
+        logging.info("computing metrics")
         in_annotated_regions = 0
         in_cds = 0
         in_5utr = 0
@@ -98,7 +104,8 @@ def bam_stats(allreads, genome, tifs):
                         min_5utr_start[chrom][gn]] - density_p[
                             min_5utr_start[chrom][gn] - 201]
                 else:
-                    print("gene " + gn + " doesn't have any info on 5'utr???")
+                    logging.info("gene " + gn +
+                                 " doesn't have any info on 5'utr???")
 
             else:
                 pass
@@ -107,7 +114,7 @@ def bam_stats(allreads, genome, tifs):
         result[chrom]["in_cds"] = in_cds
         result[chrom]["in_5utr"] = in_5utr
         result[chrom]["right_before_utr"] = right_before_utr
-        print(sum(density_n))
+        logging.info(sum(density_n))
         break
     return result
 

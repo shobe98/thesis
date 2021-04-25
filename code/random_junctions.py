@@ -1,4 +1,10 @@
 import helper
+import logging
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+else:
+    logging.basicConfig(level=logging.WARN)
 
 _, genome = helper.read_files()
 genome = helper.organize_genome_by_chrom(genome)
@@ -68,7 +74,7 @@ def get_5utr_boundaries(genome=genome, tifs=tifs):
                     min_5utr_start[chrom][gn] = gene.start
                 else:
                     if gene.start + 1 < min_5utr_start[chrom][gn]:
-                        print(
+                        logging.info(
                             gn +
                             " has the annotated start less than the min from TIFs "
                             + str(gene.start) + " " +
@@ -94,8 +100,8 @@ def generate_candidates_for_junctions(genome=genome, tifs=tifs):
                                                  min_5utr_start[chrom][gn])
                 cands_chrom = cands_chrom + list(
                     range(min_5utr_start[chrom][gn], aug_pos[chrom][gn]))
-        print(chrom + " " + str(coding_length * 1.0 / 100000.0) +
-              " total candidates for junctions")
+        logging.info(chrom + " " + str(coding_length * 1.0 / 100000.0) +
+                     " total candidates for junctions")
         candidates[chrom] = cands_chrom
 
     return candidates

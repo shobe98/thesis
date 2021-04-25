@@ -4,8 +4,17 @@ import random_junctions
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import logging
 
-np.random.seed(527)
+logger = logging.getLogger("simulate_reads")
+
+if __name__ == "__main__":
+    logger.setLevel(logging.INFO)
+else:
+    logger.setLevel(logging.WARN)
+
+if __name__ == "__main__":
+    np.random.seed(527)
 
 
 class FakeRead:
@@ -22,14 +31,20 @@ class Isoform:
         self.end = end
         self.strand = strand
 
+    def __str__(self):
+        return "Isoform({},{},{}".format(self.start, self.end, self.strand)
+
 
 # JUST PROTOTYPES
 def generate_isoform_aware_density(isoforms,
                                    distribution,
                                    total_reads,
-                                   read_length=44):
+                                   read_length=44,
+                                   plot=True,
+                                   crop_density=False):
     if len(isoforms) != len(distribution):
-        print("Error distribution and isoforms should have the same size")
+        logging.error(
+            "Error distribution and isoforms should have the same size")
         return
     isoform_reads = np.multiply(distribution, total_reads)
     isoform_reads = [int(x) for x in isoform_reads]
@@ -40,21 +55,27 @@ def generate_isoform_aware_density(isoforms,
         reads = random_reads_in_interval(isoforms[i].start, isoforms[i].end,
                                          isoform_reads[i], read_length)
         dens, _ = helper.__generate_read_density(reads)
-        print(len(dens))
+        logger.info("density length")
+        logger.info(len(dens))
         d_start = isoforms[i].start - min_p
         d_end = isoforms[i].end - min_p + 1
-        print(d_start)
-        print(d_end)
-        print(isoforms[i].start)
-        print(len(dens[isoforms[i].start:-1]))
+        logger.info("star/end")
+        logger.info(d_start)
+        logger.info(d_end)
+        logger.info(isoforms[i].start)
+        logger.info(len(dens[isoforms[i].start:-1]))
         density[d_start:d_end] = list(
             np.add(density[d_start:d_end], dens[isoforms[i].start:-1]))
 
-    plt.plot(range(min_p, max_p + 1), density)
-    plt.title("Isoform distribution\n{}".format(str(distribution)))
-    plt.savefig("tinkering/isoforms/{}_{}.png".format(len(isoforms),
-                                                      total_reads))
-    plt.close()
+    if plot:
+        plt.plot(range(min_p, max_p + 1), density)
+        plt.title("Isoform distribution\n{}".format(str(distribution)))
+        plt.savefig("tinkering/isoforms/{}_{}.png".format(
+            len(isoforms), total_reads))
+        plt.close()
+    density[0] = density[0] - 1
+    density[-1] = density[-1] - 1
+    return density
 
 
 def random_reads_by_fragmentation(lo, hi, sample_size, read_length):
@@ -126,7 +147,7 @@ def generate_uniform_reads_for_chrom():
     """ for each chromosome, generates uniformly distributed reads. Uses the original reads and the original reads with filtered outliers """
     allreads = helper.read_bamfile()
     for chrom in helper.kYeastChroms:
-        print("Generating density from bam")
+        logger.info("Generating density from bam")
 
         density_p, _ = helper.generate_read_density_chrom(chrom, allreads)
         __generate_uniform_reads_for_chrom(
@@ -137,14 +158,14 @@ def generate_uniform_reads_for_chrom():
         __generate_uniform_reads_for_chrom(
             chrom, density_p, "random_generation/end_first_filter")
 
-        print("stopping after chrI... please disable this")
+        logger.info("stopping after chrI... please disable this")
         break
 
 
 def generate_weighted_reads():
     allreads = helper.read_bamfile()
     for chrom in helper.kYeastChroms:
-        print("Generating density from bam")
+        logger.info("Generating density from bam")
 
         density_p, _ = helper.generate_read_density_chrom(chrom, allreads)
         weights = generate_weights_smart(density_p, chrom)
@@ -161,20 +182,20 @@ def fix_lengths(a, b):
 def __generate_uniform_reads_for_chrom(chrom, density_p_original,
                                        plot_location):
     sample_size = int(sum(density_p_original) / 44)
-    print("Generating %d reads..." % sample_size)
-    print("Generating uniform data...")
+    logger.info("Generating %d reads..." % sample_size)
+    logger.info("Generating uniform data...")
     uniform, _ = helper.__generate_read_density(
         random_reads_in_interval(0, len(density_p_original), sample_size, 44))
     uniform, density_p_original = fix_lengths(uniform, density_p_original)
 
-    print("Generating neively weighted data...")
+    logger.info("Generating neively weighted data...")
     weighted_naive, _ = helper.__generate_read_density(
         random_reads_in_interval(0, len(density_p_original), sample_size, 44,
                                  generate_weights_naive(density_p_original)))
     weighted_naive, density_p_original = fix_lengths(weighted_naive,
                                                      density_p_original)
 
-    print("Generating weighted data (using the avg method)...")
+    logger.info("Generating weighted data (using the avg method)...")
     weighted_avg, _ = helper.__generate_read_density(
         random_reads_in_interval(
             0, len(density_p_original), sample_size, 44,
@@ -183,7 +204,7 @@ def __generate_uniform_reads_for_chrom(chrom, density_p_original,
                                                    density_p_original)
 
     for i in range(0, len(uniform), 2000):
-        print("Plotting from " + str(i) + "...")
+        logger.info("Plotting from " + str(i) + "...")
         end = min(i + 2000, len(uniform))
         plt.plot(range(i, end),
                  density_p_original[i:end],
@@ -207,26 +228,26 @@ def __generate_uniform_reads_for_chrom(chrom, density_p_original,
         plt.close()
 
     # TODO move to separate function
-    #print("Making dataset for histogram...")
-    #print("og: %d, uniform: %d" % (len(density_p_original), len(uniform)))
+    #logger.info("Making dataset for histogram...")
+    #logger.info("og: %d, uniform: %d" % (len(density_p_original), len(uniform)))
     ##data = list(np.subtract(density_p_original, uniform))
     #data = list(np.log(density_p_original))
-    #print(len(data))
+    #logger.info(len(data))
     #if len(data) % 10000 != 0:
     #    data = data + [0] * (10000 - len(data) % 10000)
-    #print(len(data))
+    #logger.info(len(data))
     #data = [data[i:(i + 10000)] for i in range(0, len(data), 10000)]
-    #print(len(data))
+    #logger.info(len(data))
 
     #sns.heatmap(data).figure.savefig(
     #    "random_generation/whole_genome/{0}_heatmap_of_our_data_log_scale.png".
     #    format(chrom))
     #plt.close()
-    print("Done")
+    logger.info("Done")
 
 
 def generate_weights_naive(density):
-    print("Generating naive weights...")
+    logger.info("Generating naive weights...")
     # each position will be selected as a START for
     # an interval proportional with the number of reads aligned to that position
     weights = np.divide(density, sum(density))
@@ -234,7 +255,7 @@ def generate_weights_naive(density):
 
 
 def generate_weights_averaged(density):
-    print("Generating avg weights...")
+    logger.info("Generating avg weights...")
     # each position will be selected as a START for an interval
     # proportional to the average number of reads starting at a position
     # The average number of reads is the number of reads aligning divided by the avg read length
@@ -271,7 +292,7 @@ def generate_weights_smart(density,
                 genic[i] = 1
 
     genic_reads = list(np.multiply(density, genic))
-    print("Genic {}/{}%, intergenic {}, total {}".format(
+    logger.info("Genic {}/{}%, intergenic {}, total {}".format(
         sum(genic_reads) / 44.0,
         sum(genic_reads) / sum(density),
         (sum(density) - sum(genic_reads)) / 44, sum(density)))

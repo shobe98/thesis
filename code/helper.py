@@ -6,6 +6,14 @@ import sys
 from numpy import unique
 import numpy as np
 
+import logging
+logger = logging.getLogger("helper")
+
+if __name__ == "__main__":
+    logger.setLevel(logging.INFO)
+else:
+    logger.setLevel(logging.WARN)
+
 # 213 Days til graduation
 np.random.seed(213)
 
@@ -78,22 +86,24 @@ def read_all_tifs(fname=_kDefaultTIFsFile,
 
     # TODO(astanciu): this seems like bad design change it into two separate functions
     if not return_dict:
-        print("Done reading TIF file... returning a pandas")
+        logger.info("Done reading TIF file... returning a pandas")
         return tifs
 
     grouped_tifs = {}
     for chrom in kYeastChroms:
         grouped_tifs[chrom] = read_tifs_chrom(tifs, chrom)
-    print("Done reading TIF file... returning a dictionary")
+    logger.info("Done reading TIF file... returning a dictionary")
     return grouped_tifs
 
 
-def organize_genome_by_chrom(genome):
+def organize_genome_by_chrom(genome, positive_strand_only=False):
     grouped = {}
     for c in kYeastChroms:
         grouped[c] = {}
 
     for gene_id, gene in genome.items():
+        if positive_strand_only and gene.strand == "-":
+            continue
         grouped[gene.chrom][gene_id] = gene
 
     return grouped
@@ -121,7 +131,7 @@ def read_tifs_chrom(tifs, chrom, positive_strand_only=False):
     grouped_tifs = {}
     for gene in genes:
         grouped_tifs[gene] = chrom_tifs[chrom_tifs.name == gene]
-    print("Processed TIFs in chromosome " + str(chrom) + "...")
+    logger.info("Processed TIFs in chromosome " + str(chrom) + "...")
     return grouped_tifs
 
 
@@ -142,9 +152,9 @@ def grab_reads(chrom, reads, positive_strand_only=False):
         return [x for x in filtered if not x.is_reverse]
     chr_reads = list(reads.fetch(chrom))
     if DEBUG_MODE:
-        print("Processed mRNAs from chromosome " + chrom +
-              ". Total reads in chromosome: " + str(len(chr_reads)) +
-              ". positive_strand_only=" + str(positive_strand_only))
+        logger.info("Processed mRNAs from chromosome " + chrom +
+                    ". Total reads in chromosome: " + str(len(chr_reads)) +
+                    ". positive_strand_only=" + str(positive_strand_only))
     return list(filtered)  # TODO(astanciu): inefficient?
 
 
@@ -190,10 +200,14 @@ def save_density_plot(density,
     plt.savefig(filename)
     plt.close()
 
-    print("Saved plot " + filename)
+    logger.info("Saved plot " + filename)
 
 
-def generate_metagene(reads, tifs, chrom, density=None):
+def generate_metagene(reads,
+                      tifs,
+                      chrom,
+                      density=None,
+                      strategy=generate_5utr_isoform_starts):
     """
     Takes all the unique TIF 5'starts from steinmetz (from genes in a given chromosome), 
     generates read densities for each gene and overlaps all the junctions into a metagene.
@@ -209,26 +223,27 @@ def generate_metagene(reads, tifs, chrom, density=None):
     Effect:
         Saves a density plot.
     """
-    print("Generating metagene for chromosome " + chrom)
+    logger.info("Generating metagene for chromosome " + chrom)
     chrom_tifs = read_tifs_chrom(tifs, chrom)
 
     if not density:
         density = generate_read_density_chrom(chrom, reads)
-    print("Done generating density for metagene plot for chromosome " + chrom)
-    print(type(density))
+    logger.info("Done generating density for metagene plot for chromosome " +
+                chrom)
+    logger.info(type(density))
     splits = []
 
     for gene, tifs in chrom_tifs.items():
-        split_positions = generate_5utr_isoform_starts(tifs)
+        split_positions = strategy(tifs)
         splits = splits + split_positions
         if not split_positions:
-            print("WTFFF...")
-            print(gene)
-            print(tifs)
+            logger.info("WTFFF...")
+            logger.info(gene)
+            logger.info(tifs)
         #list(np.random.choice(split_positions, 1, replace=False))
-    print("type of splits[0] in make_metagene " + str(type(splits[0])))
-    print(splits[0])
-    print("Making the metagene plot...")
+    logger.info("type of splits[0] in make_metagene " + str(type(splits[0])))
+    logger.info(splits[0])
+    logger.info("Making the metagene plot...")
     return make_metagene_plot(
         density,
         splits,
@@ -244,7 +259,7 @@ def inside_annotated_regions(x, strand, genome_chrom):
 
 def generate_random_split_junctions(size, candidates, chrom_size,
                                     genome_chrom):
-    print("generating random junctions...")
+    logger.info("generating random junctions...")
     splits_p = np.random.choice(candidates, size, replace=False)
     splits_p = [(x, "+") for x in splits_p
                 if inside_annotated_regions(x, "+", genome_chrom)]
@@ -279,8 +294,8 @@ def generate_random_metagene(reads,
     Effect:
         Saves a density plot.
     """
-    print("Generating metagene for chromosome " + chrom +
-          " with randomly sampled junction sites")
+    logger.info("Generating metagene for chromosome " + chrom +
+                " with randomly sampled junction sites")
     if not density:
         density = generate_read_density_chrom(chrom, reads)
     if genome:
@@ -291,21 +306,21 @@ def generate_random_metagene(reads,
     else:
         splits_p = list(
             np.random.randint(201, chrom_size - 201, size=sample_size))
-        print(splits_p)
+        logger.info(splits_p)
         splits_p = [(x, "+") for x in splits_p]
-        print(splits_p)
+        logger.info(splits_p)
         splits_n = list(
             np.random.randint(201, chrom_size - 201, size=sample_size))
         splits_n = [(x, "-") for x in splits_n]
 
         splits = splits_p + splits_n
 
-    print(
+    logger.info(
         "Done generating density for random-sample-metagene plot for chromosome "
         + chrom)
-    print(splits)
+    logger.info(splits)
     # TODO(astanciu): check for duplicates
-    print("Generating random sample metagene...")
+    logger.info("Generating random sample metagene...")
     return make_metagene_plot(density,
                               splits,
                               "tester_output_w_junctions/meta_pos_" + chrom +
@@ -320,7 +335,8 @@ def make_metagene_plot(density,
                        plotname,
                        upstream,
                        downstream,
-                       plottitle="Metagene"):
+                       plottitle="Metagene",
+                       plot=True):
     """ 
     Generates a metagene plot from a read density array, a list of indices and a window around each split.
     
@@ -341,14 +357,15 @@ def make_metagene_plot(density,
     Effect?:
         Saves a metagene plot.
     """
-    print("Generating metagene plot... Number of overlapping sites is: " +
-          str(len(splits)))
+    logger.info(
+        "Generating metagene plot... Number of overlapping sites is: " +
+        str(len(splits)))
     meta = np.zeros(upstream + downstream)
-    print(type(density))
+    logger.info(type(density))
     density_p, density_n = density
 
-    print("type of splits[0] is " + str(type(splits[0])))
-    print(splits[0])
+    logger.info("type of splits[0] is " + str(type(splits[0])))
+    logger.info(splits[0])
     for splitidx, strand in splits:
         if strand == "+":
             meta = np.add(
@@ -357,29 +374,30 @@ def make_metagene_plot(density,
             meta = np.add(
                 meta, density_n[(splitidx - upstream):(splitidx + downstream)])
 
-    print("Saving metagene plot...")
-    save_density_plot(meta,
-                      range(-upstream, downstream),
-                      plotname,
-                      title=plottitle)
+    if plot:
+        logger.info("Saving metagene plot...")
+        save_density_plot(meta,
+                          range(-upstream, downstream),
+                          plotname,
+                          title=plottitle)
     return meta
 
 
 def read_bamfile(bamfile=_kDefaultBamFile):
-    print("Reading bamfile...")
+    logger.info("Reading bamfile...")
     # This is just an iterator in the file
     bam = pysam.AlignmentFile(bamfile)
-    print("Done reading bamfile " + bamfile)
+    logger.info("Done reading bamfile " + bamfile)
     return bam
 
 
 def read_bedfile(bedfile=_kDefaultBedFile):
-    print("Reading bedfile...")
+    logger.info("Reading bedfile...")
     genes = BedTool(bedfile)  # Full genome loaded in memory
     genes_dict = {}
     for g in genes:
         genes_dict[g.name] = g
-    print("Done reading bedfile " + bedfile)
+    logger.info("Done reading bedfile " + bedfile)
     return genes_dict
 
 
@@ -410,7 +428,7 @@ def generate_read_density_chrom(chrom, allreads):
     This function is linear in number of reads and length of chromosome.
     (doesn't depend on read length)
     """
-    print("generate_read_density_chrom chrom=" + chrom)
+    logger.info("generate_read_density_chrom chrom=" + chrom)
     reads = grab_reads(chrom, allreads)
     return __generate_read_density(reads)
 
@@ -420,8 +438,8 @@ def __generate_read_density(reads):
     for read in reads:
         end = max(end, read.reference_end)
     if DEBUG_MODE:
-        print("len(reads)=" + str(len(reads)))
-        print("chrom_size=" + str(end))
+        logger.info("len(reads)=" + str(len(reads)))
+        logger.info("chrom_size=" + str(end))
 
     # To compute the density first compute the delta in read density at each position in the genome
     density_p = [0] * (end + 2)
@@ -446,9 +464,9 @@ def __generate_read_density(reads):
     for i in range(1, len(density_p)):
         density_p[i] = density_p[i] + density_p[i - 1]
         density_n[i] = density_n[i] + density_n[i - 1]
-    print("Done generating read density...")
-    print("Sum of density_n: " + str(sum(density_n)))
-    print("Sum of density_p: " + str(sum(density_p)))
+    logger.info("Done generating read density...")
+    logger.info("Sum of density_n: " + str(sum(density_n)))
+    logger.info("Sum of density_p: " + str(sum(density_p)))
     return (density_p, density_n)
 
 
@@ -462,7 +480,7 @@ def generate_read_density_interval(start, end, allreads):
     (doesn't depend on read length)
     """
     # For more details check generate_read_density_chrom
-    print("This function is not used outside of its own test")
+    logger.info("This function is not used outside of its own test")
     density = [0] * (end - start + 2)
     #TODO(astanciu): should not use chrI here but rather a parameter.
     reads = grab_reads("chrI", allreads, positive_strand_only=True)
