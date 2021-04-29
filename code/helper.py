@@ -12,7 +12,7 @@ logger = logging.getLogger("helper")
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
 else:
-    logger.setLevel(logging.WARN)
+    logger.setLevel(logging.INFO)
 
 # 213 Days til graduation
 np.random.seed(213)
