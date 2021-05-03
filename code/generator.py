@@ -76,4 +76,4 @@ for chrom in helper.kYeastChroms:
         if counter % 50 == 0:
             print("Processed " + str(counter))
     print("Done with " + chrom)
-pickle.dump(data, open("toy.pickle", "wb"))
+pickle.dump(data, open("first_dataset.pickle", "wb"))

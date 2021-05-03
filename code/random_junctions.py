@@ -6,7 +6,7 @@ if __name__ == "__main__":
 else:
     logging.basicConfig(level=logging.WARN)
 
-_, genome = helper.read_files()
+genome = helper.read_bedfile()
 genome = helper.organize_genome_by_chrom(genome)
 
 # TODO(astanciu): change to include negative strand too.
