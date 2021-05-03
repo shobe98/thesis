@@ -31,4 +31,4 @@ for chrom in helper.kYeastChroms:
     pickle.dump({
         "+": bad_p,
         "-": bad_n
-    }, open(chrom + "_bad_genes.pickle", "wb"))
+    }, open("pickles/" + chrom + "_bad_genes.pickle", "wb"))

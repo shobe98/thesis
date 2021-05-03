@@ -1,0 +1,28 @@
+Keyring is skipped due to an exception: org.freedesktop.DBus.Error.FileNotFound: Failed to connect to socket /run/user/3035/bus: No such file or directory
+WARNING: You are using pip version 20.2.4; however, version 21.0.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+Keyring is skipped due to an exception: org.freedesktop.DBus.Error.FileNotFound: Failed to connect to socket /run/user/3035/bus: No such file or directory
+WARNING: You are using pip version 20.2.4; however, version 21.0.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+Keyring is skipped due to an exception: org.freedesktop.DBus.Error.FileNotFound: Failed to connect to socket /run/user/3035/bus: No such file or directory
+WARNING: You are using pip version 20.2.4; however, version 21.0.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+Keyring is skipped due to an exception: org.freedesktop.DBus.Error.FileNotFound: Failed to connect to socket /run/user/3035/bus: No such file or directory
+WARNING: You are using pip version 20.2.4; however, version 21.0.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+Keyring is skipped due to an exception: org.freedesktop.DBus.Error.FileNotFound: Failed to connect to socket /run/user/3035/bus: No such file or directory
+WARNING: You are using pip version 20.2.4; however, version 21.0.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+[E::hts_open_format] Failed to open file "~/Thesis/AitkenLab/CA1_3.bam" : No such file or directory
+Traceback (most recent call last):
+  File "tester.py", line 6, in <module>
+    import random_junctions
+  File "/home/astanciu/Thesis/code/random_junctions.py", line 3, in <module>
+    _, genome = helper.read_files()
+  File "/home/astanciu/Thesis/code/helper.py", line 385, in read_files
+    return read_bamfile(bamfile), read_bedfile(bedfile)
+  File "/home/astanciu/Thesis/code/helper.py", line 366, in read_bamfile
+    bam = pysam.AlignmentFile(bamfile)
+  File "pysam/libcalignmentfile.pyx", line 742, in pysam.libcalignmentfile.AlignmentFile.__cinit__
+  File "pysam/libcalignmentfile.pyx", line 941, in pysam.libcalignmentfile.AlignmentFile._open
+FileNotFoundError: [Errno 2] could not open alignment file `~/Thesis/AitkenLab/CA1_3.bam`: No such file or directory

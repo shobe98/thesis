@@ -13,10 +13,10 @@ matplotlib.use('Agg')
 np.random.seed(213)
 
 # This script is in ../code. Change these paths if needed
-_kDefaultBamFile = "../AitkenLab/CA1_3.bam"
-_kDefaultBedFile = "../indexes/yeast-all.bed"
-_kDefaultMTIFFile = "../SteinmetzGilbert/stmtz_n_mtifs.txt"
-_kDefaultTIFsFile = "../parsed_steinmetz_s1_tifs.txt"
+_kDefaultBamFile = "/home/astanciu/Thesis/AitkenLab/CA1_3.bam"
+_kDefaultBedFile = "/home/astanciu/Thesis/indexes/yeast-all.bed"
+_kDefaultMTIFFile = "~/Thesis/SteinmetzGilbert/stmtz_n_mtifs.txt"
+_kDefaultTIFsFile = "~/Thesis/parsed_steinmetz_s1_tifs.txt"
 _kMetageneRangeNt = 50
 
 DEBUG_MODE = True

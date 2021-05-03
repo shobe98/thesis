@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "tester.py", line 1, in <module>
+    import helper
+  File "/home/astanciu/Thesis/code/helper.py", line 2, in <module>
+    import matplotlib.pyplot as plt
+ModuleNotFoundError: No module named 'matplotlib'
