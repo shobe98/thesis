@@ -3,6 +3,7 @@ import argparse
 import csv
 import helper
 import metagene_helper
+import pickle
 import numpy as np
 from metagene_helper import select_one_random_junction, kJunctionCandidates
 
