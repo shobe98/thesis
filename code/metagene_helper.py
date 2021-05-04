@@ -17,6 +17,7 @@ def select_one_random_junction(chrom, tifs):
 
 def process_generated_data(data):
     densities = {}
+    isoforms = {}
     for chrom in helper.kYeastChroms:
         end = max([
             max([iso.end for iso in row['isoforms']]) for row in data
@@ -24,6 +25,7 @@ def process_generated_data(data):
         ])
         density = [0] * end
         densities[chrom] = density
+        isoforms[chrom] = {}
 
     for row in data:
         starts = [iso.start for iso in row['isoforms']]
@@ -34,6 +36,6 @@ def process_generated_data(data):
             't5': starts,
             't3': ends
         })
-        densities[row['chrom']][start:(end + 1)] = np.add(
-            densities[row['chrom']][start:(end + 1)], row['density'])
+        densities[row['chrom']][start:(end + 2)] = np.add(
+            densities[row['chrom']][start:(end + 2)], row['density'])
     return densities, isoforms

@@ -384,6 +384,8 @@ def make_metagene_plot(density,
 
 
 def read_bamfile(bamfile=_kDefaultBamFile):
+    logger.warn("function read_bamfile is temporarly disabled")
+    return ""
     logger.info("Reading bamfile...")
     # This is just an iterator in the file
     bam = pysam.AlignmentFile(bamfile)

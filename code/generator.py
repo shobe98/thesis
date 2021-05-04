@@ -40,7 +40,7 @@ for chrom in helper.kYeastChroms:
         isoforms = np.unique([int(x) for x in sorted(isoforms)])
 
         #print("isoforms2")
-        distr = [np.random.randint(1000) for i in range(0, len(isoforms))]
+        distr = [np.random.randint(1, 1000) for i in range(0, len(isoforms))]
         distr = np.divide(distr, sum(distr))
 
         #print("distr")
