@@ -23,7 +23,7 @@ def process_generated_data(data):
             max([iso.end for iso in row['isoforms']]) for row in data
             if row['chrom'] == chrom
         ])
-        density = [0] * end
+        density = [0] * (end + 2)
         densities[chrom] = density
         isoforms[chrom] = {}
 
@@ -36,6 +36,6 @@ def process_generated_data(data):
             't5': starts,
             't3': ends
         })
-        densities[row['chrom']][start:(end + 2)] = np.add(
-            densities[row['chrom']][start:(end + 2)], row['density'])
+        densities[row['chrom']][start:(end + 1)] = np.add(
+            densities[row['chrom']][start:(end + 1)], row['density'])
     return densities, isoforms

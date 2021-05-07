@@ -46,8 +46,8 @@ output_writer = csv.writer(output_file,
                            quoting=csv.QUOTE_MINIMAL)
 
 output_writer.writerow(["iteration"] +
-                       ["j_delta_" + str(i) for i in range(1, 100)] +
-                       ["f_delta_" + str(i) for i in range(1, 100)])
+                       ["j_delta_" + str(i) for i in range(1, args.n)] +
+                       ["f_delta_" + str(i) for i in range(1, args.n)])
 
 if args.input_type == "rnaseq":
     tifs = helper.read_all_tifs(args.input_mtif,
@@ -66,8 +66,8 @@ else:
     densities, tifs = metagene_helper.process_generated_data(generated)
 
 for it in range(0, args.iterations):
-    big_meta = [0] * 200
-    fake_meta = [0] * 200
+    big_meta = [0] * (2 * args.n)
+    fake_meta = [0] * (2 * args.n)
 
     for chrom in helper.kYeastChroms:
         splits = select_one_random_junction(chrom, tifs)
