@@ -12,5 +12,5 @@
 #SBATCH --mail-type=begin   # email me when the job starts 
 #SBATCH --mail-type=end     # email me when the job finishes
 
+python3 metagene_hypothesis.py --iterations 1000 rnaseq ../AitkenLab/rnaseq_all.bam ../parsed_steinmetz_s1_tifs.txt bam_file_ks_test.csv
 
-python3 generator.py
