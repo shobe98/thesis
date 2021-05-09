@@ -1,0 +1,72 @@
+Done with chrI
+Processed 50
+Processed 100
+Processed 150
+Processed 200
+Done with chrII
+Processed 250
+Done with chrIII
+Processed 300
+Processed 350
+Processed 400
+Processed 450
+Processed 500
+Processed 550
+Processed 600
+Done with chrIV
+Processed 650
+Processed 700
+Processed 750
+Done with chrV
+Processed 800
+Done with chrVI
+Processed 850
+Processed 900
+Processed 950
+Processed 1000
+Processed 1050
+Processed 1100
+Done with chrVII
+Processed 1150
+Processed 1200
+Done with chrVIII
+Processed 1250
+Processed 1300
+Done with chrIX
+Processed 1350
+Processed 1400
+Processed 1450
+Processed 1500
+Done with chrX
+Processed 1550
+Processed 1600
+Processed 1650
+Done with chrXI
+Processed 1700
+Processed 1750
+Processed 1800
+Processed 1850
+Processed 1900
+Done with chrXII
+Processed 1950
+Processed 2000
+Processed 2050
+Processed 2100
+Done with chrXIII
+Processed 2150
+Processed 2200
+Processed 2250
+Processed 2300
+Done with chrXIV
+Processed 2350
+Processed 2400
+Processed 2450
+Processed 2500
+Processed 2550
+Done with chrXV
+Processed 2600
+Processed 2650
+Processed 2700
+Processed 2750
+Processed 2800
+Done with chrXVI
