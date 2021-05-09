@@ -7,7 +7,8 @@ tifs = helper.read_all_tifs(positive_strand_only=False, return_dict=True)
 genome = helper.organize_genome_by_chrom(helper.read_bedfile())
 bamfile = helper.read_bamfile()
 
-gene_start, gene_end = get_5utr_boundaries()
+#gene_start, gene_end = get_5utr_boundaries()
+gene_start, gene_end = get_max_possible_genomic_regions()
 
 for chrom in helper.kYeastChroms:
     density, _ = helper.generate_read_density_chrom(chrom, bamfile)
@@ -22,7 +23,10 @@ for chrom in helper.kYeastChroms:
             for j in junctions:
                 plt.axvline(j, color='k', alpha=0.5)
 
-            plt.title("gene_" + gn + ".png")
-            plt.savefig("bulk/utr_" + gn + ".png")
+            plt.xlabel("Genomic position (nt)")
+            plt.ylabel("Read density")
+
+            plt.title("Read density across 5'UTR of gene " + gn)
+
+            plt.savefig("bulk/gene_" + gn + ".png")
             plt.close()
-    break
