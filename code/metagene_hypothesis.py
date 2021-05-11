@@ -59,7 +59,6 @@ if args.input_type == "rnaseq":
     for chrom in helper.kYeastChroms:
         density, _ = helper.generate_read_density_chrom(chrom, reads)
         densities[chrom] = density
-        break
     del _
 else:
     generated = pickle.load(open(args.input_pickle, "rb"))
@@ -91,7 +90,6 @@ for it in range(0, args.iterations):
                                          plot=False)
         fake_meta = np.add(fake_meta, meta)
 
-        break
     data = [
         big_meta[args.n + i] / big_meta[args.n - i] for i in range(1, args.n)
     ] + [

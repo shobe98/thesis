@@ -11,3 +11,5 @@ accepted_hits.bam
 align_summary.txt
 toy.pickle
 first_dataset.pickle
+*.err
+*_res.txt
