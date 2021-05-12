@@ -1,6 +1,7 @@
 import numpy as np
 import helper
 from simulate_reads import generate_isoform_aware_density, Isoform
+from scipy.stats import gennorm
 
 import pickle
 import logging
@@ -14,6 +15,8 @@ logger.setLevel(logging.WARN)
 
 shape = 1.5832492463511025
 scale = 78.63922662988816
+
+gennorm_parameters = (1.031966908880634, 6.300794747865959, 1.0705689069170423)
 
 np.random.seed(527)
 
@@ -29,7 +32,10 @@ for chrom in helper.kYeastChroms:
         #print(gn)
         start = int(genome[chrom][gn].fields[6])
         end = int(genome[chrom][gn].fields[7])
-        counts = np.random.randint(5000)
+        counts = int(
+            gennorm.rvs(gennorm_parameters[0],
+                        loc=gennorm_parameters[1],
+                        scale=gennorm_parameters[2]))
         isoforms_n = np.random.randint(1, 6)
         #print("shape ready")
 
@@ -76,4 +82,4 @@ for chrom in helper.kYeastChroms:
         if counter % 50 == 0:
             print("Processed " + str(counter))
     print("Done with " + chrom)
-pickle.dump(data, open("first_dataset.pickle", "wb"))
+pickle.dump(data, open("second_dataset.pickle", "wb"))
