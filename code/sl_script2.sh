@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -c 1     # Number of cores
-#SBATCH --job-name=data_generation
-#SBATCH -o simulated.out	# File to which STDOUT will be written
-#SBATCH -e simulated.err	# File to which STDERR will be written
-#SBATCH --output=simulated_res.txt
+#SBATCH --job-name=process_generated_data
+#SBATCH -o process.out	# File to which STDOUT will be written
+#SBATCH -e process.err	# File to which STDERR will be written
+#SBATCH --output=process.txt
 #SBATCH -p general		# Partition to submit to
 #
 #SBATCH --ntasks=1
@@ -11,5 +11,8 @@
 #SBATCH --mail-user=astanciu@vassar.edu 
 #SBATCH --mail-type=begin   # email me when the job starts 
 #SBATCH --mail-type=end     # email me when the job finishes
+#SBATCH --begin=05:00:00 # start at 5AM to ensure that the generator finished running.
 
-python3 metagene_hypothesis.py --iterations 1000 simulated first_dataset.pickle simulated_data_ks_test.csv
+squeue
+
+python3 metagene_hypothesis.py --iterations 1000 simulated second_dataset.pickle simulated_data_ks_test_2.csv

@@ -32,10 +32,9 @@ for chrom in helper.kYeastChroms:
         #print(gn)
         start = int(genome[chrom][gn].fields[6])
         end = int(genome[chrom][gn].fields[7])
-        counts = int(
-            gennorm.rvs(gennorm_parameters[0],
+        counts = int(np.exp(gennorm.rvs(gennorm_parameters[0],
                         loc=gennorm_parameters[1],
-                        scale=gennorm_parameters[2]))
+                        scale=gennorm_parameters[2])))
         isoforms_n = np.random.randint(1, 6)
         #print("shape ready")
 
