@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -c 1     # Number of cores
-#SBATCH --job-name=data_generation
-#SBATCH -o generator.out	# File to which STDOUT will be written
-#SBATCH -e generator.err	# File to which STDERR will be written
-#SBATCH --output=generator.txt
+#SBATCH --job-name=densities
+#SBATCH -o densities.out	# File to which STDOUT will be written
+#SBATCH -e densities.err	# File to which STDERR will be written
+#SBATCH --output=densities.txt
 #SBATCH -p general		# Partition to submit to
 #
 #SBATCH --ntasks=1
@@ -13,4 +13,4 @@
 #SBATCH --mail-type=end     # email me when the job finishes
 
 
-python3 generator.py
+python3 generate_densities.py
